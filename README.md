@@ -127,7 +127,7 @@ config.yaml             # Editable search terms — the only file most changes n
 
 ```bash
 git clone <this-repo-url>
-cd job-alerts
+cd scan-scraper
 python3 -m venv .venv
 source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
