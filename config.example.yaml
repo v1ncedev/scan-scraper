@@ -1,0 +1,54 @@
+# =============================================================================
+# Example job-alert configuration — copy to config.yaml and edit.
+#
+#   cp config.example.yaml config.yaml
+#
+# This file documents every available option. Secrets (API keys, tokens) do NOT
+# go here — they live in your .env file / GitHub Actions Secrets.
+# =============================================================================
+
+# Adzuna country code used in the API path. "gb" = United Kingdom.
+country: gb
+
+# --- Source 1: Adzuna API (structured job aggregator) ---
+adzuna:
+  # Set to false to skip this source entirely.
+  enabled: true
+
+  # One API search is made per keyword; results are merged. Required, at least one.
+  keywords:
+    - graduate
+    - data analyst
+
+  # Optional location filter — a specific place within `country` above, e.g.
+  # "London" or "Manchester". Leave unset (comment out) for a nationwide search.
+  # Note: values like "United Kingdom" don't work here and silently return
+  # zero results — `country: gb` above already scopes the search to the UK.
+  # where: London
+
+  # Optional Adzuna category slug (e.g. it-jobs, graduate-jobs, accounting-finance-jobs).
+  # Full list: https://developer.adzuna.com/docs/categories
+  # Delete this line to search all categories.
+  category: it-jobs
+
+  # Results requested per keyword (1-50 on the free tier).
+  results_per_page: 20
+
+  # Ignore postings older than this many days.
+  max_days_old: 7
+
+# --- Source 2: Company careers boards (Greenhouse) ---
+# One list entry per company. Duplicate a block to track more companies.
+greenhouse:
+  - enabled: true
+    # The company's board slug in boards-api.greenhouse.io/v1/boards/<token>/jobs
+    board_token: monzo
+    # Friendly name shown in notifications (optional; defaults to board_token).
+    company_name: Monzo
+    # Title must contain one of these (case-insensitive). Required, at least one.
+    keywords:
+      - graduate
+      - junior
+      - analyst
+    # Optional location substring filter (case-insensitive). Delete for any location.
+    where: London

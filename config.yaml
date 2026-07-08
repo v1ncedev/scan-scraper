@@ -1,0 +1,50 @@
+# =============================================================================
+# Job-alert search configuration.
+#
+# This is the ONLY file you need to edit to change what jobs you get alerted
+# about — no code changes required. Secrets (API keys, tokens) live separately
+# in your .env file / GitHub Actions Secrets, never here.
+# =============================================================================
+
+# Adzuna country code used in the API path. "gb" = United Kingdom.
+country: gb
+
+# --- Source 1: Adzuna API (structured job aggregator) ---
+adzuna:
+  enabled: true
+
+  # We run one search per keyword and merge the results. Add/remove freely.
+  keywords:
+    - graduate
+    - graduate scheme
+    - data analyst
+    - junior software engineer
+
+  # Optional location filter — a specific place within `country` above, e.g.
+  # "London" or "Manchester". Leave unset (comment out) for a nationwide search.
+  # Note: values like "United Kingdom" don't work here and silently return
+  # zero results — `country: gb` above already scopes the search to the UK.
+  # where: London
+
+  # Optional Adzuna category slug. Comment out or set to leave unfiltered.
+  # Full list: https://developer.adzuna.com/docs/categories
+  category: it-jobs
+
+  # Up to 50 on the free tier.
+  results_per_page: 20
+
+  # Only consider postings created within this many days.
+  max_days_old: 7
+
+# --- Source 2: Company careers boards (Greenhouse) ---
+# Each list entry is one company. Add more by copying a block and changing the
+# board_token — that's the whole "pluggable sources" story.
+greenhouse:
+  - enabled: true
+    board_token: monzo        # the slug in boards-api.greenhouse.io/v1/boards/<token>/jobs
+    company_name: Monzo
+    keywords:
+      - graduate
+      - junior
+      - analyst
+    where: London             # optional; remove to allow any location

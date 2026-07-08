@@ -1,0 +1,58 @@
+name: Job Alerts
+
+on:
+  # Run automatically every 6 hours.
+  schedule:
+    - cron: '0 */6 * * *'
+  # Also allow triggering manually from the Actions tab, e.g. for testing
+  # after a change, without waiting for the next scheduled run.
+  workflow_dispatch:
+
+# GitHub Actions runners are ephemeral — nothing written to disk during a run
+# survives to the next one. Our SQLite dedup database (data/seen_jobs.db)
+# needs to persist between runs, so this workflow commits it back to the repo
+# after each run. That needs write access to repo contents.
+permissions:
+  contents: write
+
+# If a run somehow takes longer than 6 hours (shouldn't happen, but just in
+# case), this stops a new scheduled run from starting while one is still in
+# progress and racing it to commit the database.
+concurrency:
+  group: job-alerts
+  cancel-in-progress: false
+
+jobs:
+  run-job-alerts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run job-alert pipeline
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python run.py
+
+      - name: Commit updated database back to the repo
+        run: |
+          git config user.name "job-alerts-bot"
+          git config user.email "actions@github.com"
+          git add data/seen_jobs.db
+          # Only commit if the database actually changed — avoids an empty
+          # commit (and an empty commit would fail anyway) on runs where no
+          # new postings were found.
+          git diff --staged --quiet || git commit -m "chore: update seen jobs DB [skip ci]"
+          git push

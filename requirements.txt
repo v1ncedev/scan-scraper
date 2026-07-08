@@ -1,0 +1,23 @@
+# --- Runtime dependencies ---
+# HTTP client used by every source and by the Telegram notifier.
+requests>=2.31
+
+# Reads the human-editable config.yaml file.
+PyYAML>=6.0
+
+# Validates config.yaml at load time and turns typos/missing fields into a
+# clear error instead of a mysterious KeyError deep in the code.
+pydantic>=2.6
+
+# Pydantic's companion package for reading secrets from environment variables
+# (and, locally, from a .env file).
+pydantic-settings>=2.2
+
+# Loads a local .env file into environment variables during development so we
+# never hardcode API keys. In GitHub Actions the secrets come from the
+# environment directly, so .env is only a local convenience.
+python-dotenv>=1.0
+
+# --- Development-only dependency ---
+# Test runner for the unit tests in tests/. Not needed to run the tool itself.
+pytest>=8.0

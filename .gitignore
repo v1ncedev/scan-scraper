@@ -1,0 +1,22 @@
+# Secrets — never commit real API keys or tokens.
+.env
+
+# Python bytecode / caches.
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments.
+.venv/
+venv/
+
+# OS noise.
+.DS_Store
+
+# Local Claude Code tool settings — machine-specific, not part of the project.
+.claude/
+
+# NOTE: data/seen_jobs.db is deliberately NOT ignored.
+# The GitHub Actions workflow commits it back to the repo after each run so the
+# deduplication state survives the ephemeral runner. See the README.
