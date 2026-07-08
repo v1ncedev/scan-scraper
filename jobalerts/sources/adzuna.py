@@ -10,7 +10,7 @@ accepts a single search phrase) and merge the results into one list.
 from __future__ import annotations
 
 import logging
-from typing import List
+from typing import List, Optional
 
 import requests
 
@@ -26,6 +26,35 @@ _ADZUNA_URL_TEMPLATE = "https://api.adzuna.com/v1/api/jobs/{country}/search/1"
 # Keep the tool responsive even if Adzuna is slow or unreachable — this is what
 # lets safe_fetch() move on and log a failure instead of hanging the whole run.
 _REQUEST_TIMEOUT_SECONDS = 15
+
+
+def _format_salary(result: dict) -> Optional[str]:
+    """Turn Adzuna's raw salary_min/salary_max/salary_is_predicted fields into
+    a ready-to-display string, or None if the job has no salary data at all.
+
+    Adzuna doesn't return a currency field, but since we only ever query the
+    "gb" country path, GBP is a safe assumption here — this isn't meant to
+    generalise to other countries without revisiting it.
+
+    A single figure (min == max) is common when Adzuna has predicted a salary
+    from the job description rather than the employer stating a range, so we
+    label those as "(estimated)" rather than presenting a guess as fact.
+    """
+    salary_min = result.get("salary_min")
+    salary_max = result.get("salary_max")
+    if not salary_min and not salary_max:
+        return None
+
+    is_estimated = result.get("salary_is_predicted") == "1"
+    suffix = " (estimated)" if is_estimated else ""
+
+    # Round to the nearest whole number — Adzuna's predicted figures often
+    # come back with irrelevant decimal precision (e.g. 28155.81).
+    if salary_min and salary_max and round(salary_min) != round(salary_max):
+        return f"£{round(salary_min):,} - £{round(salary_max):,}{suffix}"
+
+    single_value = salary_min or salary_max
+    return f"£{round(single_value):,}{suffix}"
 
 
 def fetch_adzuna(config: AdzunaSourceConfig, country: str, settings: Settings) -> List[Posting]:
@@ -76,6 +105,7 @@ def fetch_adzuna(config: AdzunaSourceConfig, country: str, settings: Settings) -
                     location=result.get("location", {}).get("display_name", "Unknown"),
                     url=result.get("redirect_url", ""),
                     posted_date=result.get("created"),
+                    salary=_format_salary(result),
                 )
             )
 

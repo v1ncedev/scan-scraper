@@ -36,9 +36,13 @@ def _format_posting(posting: Posting) -> str:
     Telegram's HTML mode supports a small set of tags (b, i, a, ...); we only
     need bold and a link, so we avoid pulling in a templating library for it.
     """
+    # Not every source has salary data (Greenhouse's public API has no
+    # structured salary field), so this line is only included when present.
+    salary_line = f"💰 {posting.salary}\n" if posting.salary else ""
     return (
         f"<b>{posting.title}</b> — {posting.company}\n"
         f"📍 {posting.location}\n"
+        f"{salary_line}"
         f'🔗 <a href="{posting.url}">View posting</a>'
     )
 

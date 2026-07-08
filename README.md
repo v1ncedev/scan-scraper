@@ -45,15 +45,21 @@ Every 6 hours, the tool:
 >
 > **Graduate Data Analyst** — Monzo
 > 📍 Cardiff, London or Remote (UK)
+> 💰 £28,000 - £35,000
 > 🔗 [View posting](#)
 >
 > **Junior Software Engineer** — Wise
 > 📍 London
+> 💰 £40,680 (estimated)
 > 🔗 [View posting](#)
 >
 > **Data Analyst Graduate Scheme** — NHS Digital
 > 📍 Leeds
 > 🔗 [View posting](#)
+
+The third example has no salary line — Greenhouse's public API doesn't
+expose structured salary data, so that field is simply omitted for those
+postings rather than showing a placeholder.
 
 *(Add a real screenshot here once you've received your first live alert —
 `docs/example-notification.png` and reference it with
@@ -251,6 +257,14 @@ testing against the real APIs rather than being planned upfront:
   exception during a fetch is logged with a full traceback and treated as
   "this source found zero jobs this run" rather than crashing the whole
   scheduled job.
+- **Why some salary figures are labelled "(estimated)".** Adzuna sometimes
+  returns a real employer-stated range, and sometimes a single figure it has
+  predicted itself from the job description (flagged via
+  `salary_is_predicted`). Presenting a guess with the same confidence as a
+  real number would be misleading, so predicted figures are labelled
+  explicitly. `salary` is optional on `Posting` and left as `None` for
+  Greenhouse postings, which have no structured salary field at all — the
+  notifier simply omits that line rather than showing a placeholder.
 
 ## Requirements / dependencies
 

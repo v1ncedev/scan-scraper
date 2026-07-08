@@ -38,6 +38,12 @@ class Posting:
     # runs on Python 3.9, which Pydantic evaluates at import time.)
     posted_date: Optional[str] = None
 
+    # A ready-to-display string, e.g. "£28,000 - £35,000" or "£40,000 (estimated)".
+    # Each source is responsible for formatting its own salary text (if it has
+    # one at all) — Greenhouse's public API has no structured salary field, so
+    # Greenhouse postings simply leave this as None.
+    salary: Optional[str] = None
+
     @property
     def _canonical_url(self) -> str:
         """The URL with its query string and fragment stripped.
